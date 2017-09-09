@@ -1,1 +1,4 @@
-bazel-*
+project/.idea/libraries
+project/.idea/workspace.xml
+workspace/bazel-*
+workspace/gen

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -19,18 +20,22 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.covertbagel.neko.R;
-
 public class Cat extends Drawable {
-    public static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
+
+    private static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
 
     private Random mNotSoRandom;
     private Bitmap mBitmap;
@@ -46,15 +51,15 @@ public class Cat extends Drawable {
         return mNotSoRandom;
     }
 
-    public static final float frandrange(Random r, float a, float b) {
+    private static float frandrange(Random r, float a, float b) {
         return (b-a)*r.nextFloat() + a;
     }
 
-    public static final Object choose(Random r, Object...l) {
+    private static Object choose(Random r, Object...l) {
         return l[r.nextInt(l.length)];
     }
 
-    public static final int chooseP(Random r, int[] a) {
+    private static int chooseP(Random r, int[] a) {
         int pct = r.nextInt(1000);
         final int stop = a.length-2;
         int i=0;
@@ -66,7 +71,7 @@ public class Cat extends Drawable {
         return a[i+1];
     }
 
-    public static final int[] P_BODY_COLORS = {
+    private static final int[] P_BODY_COLORS = {
             180, 0xFF212121, // black
             180, 0xFFFFFFFF, // white
             140, 0xFF616161, // gray
@@ -81,7 +86,7 @@ public class Cat extends Drawable {
               1, 0,          // ?!?!?!
     };
 
-    public static final int[] P_COLLAR_COLORS = {
+    private static final int[] P_COLLAR_COLORS = {
             250, 0xFFFFFFFF,
             250, 0xFF000000,
             250, 0xFFF44336,
@@ -92,25 +97,25 @@ public class Cat extends Drawable {
              50, 0xFF4CAF50,
     };
 
-    public static final int[] P_BELLY_COLORS = {
+    private static final int[] P_BELLY_COLORS = {
             750, 0,
             250, 0xFFFFFFFF,
     };
 
-    public static final int[] P_DARK_SPOT_COLORS = {
+    private static final int[] P_DARK_SPOT_COLORS = {
             700, 0,
             250, 0xFF212121,
              50, 0xFF6D4C41,
     };
 
-    public static final int[] P_LIGHT_SPOT_COLORS = {
+    private static final int[] P_LIGHT_SPOT_COLORS = {
             700, 0,
             300, 0xFFFFFFFF,
     };
 
     private CatParts D;
 
-    public static void tint(int color, Drawable ... ds) {
+    private static void tint(int color, Drawable ... ds) {
         for (Drawable d : ds) {
             if (d != null) {
                 d.mutate().setTint(color);
@@ -118,14 +123,14 @@ public class Cat extends Drawable {
         }
     }
 
-    public static boolean isDark(int color) {
+    private static boolean isDark(int color) {
         final int r = (color & 0xFF0000) >> 16;
         final int g = (color & 0x00FF00) >> 8;
         final int b = color & 0x0000FF;
         return (r + g + b) < 0x80;
     }
 
-    public Cat(Context context, long seed) {
+    Cat(Context context, long seed) {
         D = new CatParts(context);
         mSeed = seed;
 
@@ -178,13 +183,11 @@ public class Cat extends Drawable {
         tint((nsr.nextFloat() < 0.1f) ? collarColor : 0, D.bowtie);
     }
 
-    public static Cat create(Context context) {
+    static Cat create(Context context) {
         return new Cat(context, Math.abs(ThreadLocalRandom.current().nextInt()));
     }
 
-    public Notification.Builder buildNotification(Context context) {
-        final Bundle extras = new Bundle();
-        extras.putString("android.substName", context.getString(R.string.notification_name));
+    Notification.Builder buildNotification(Context context) {
         final Intent intent = new Intent(Intent.ACTION_MAIN)
                 .setClass(context, NekoLand.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -199,23 +202,22 @@ public class Cat extends Drawable {
                 .setContentText(getName())
                 .setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
                 .setAutoCancel(true)
-                .setVibrate(PURR)
-                .addExtras(extras);
+                .setVibrate(PURR);
     }
 
-    public long getSeed() {
+    long getSeed() {
         return mSeed;
     }
 
     @Override
-    public void draw(Canvas canvas) {
-        final int w = Math.min(canvas.getWidth(), canvas.getHeight());
-        final int h = w;
+    public void draw(@NonNull Canvas canvas) {
+        final int widthAndHeight = Math.min(canvas.getWidth(), canvas.getHeight());
 
-        if (mBitmap == null || mBitmap.getWidth() != w || mBitmap.getHeight() != h) {
-            mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        if (mBitmap == null
+                || mBitmap.getWidth() != widthAndHeight || mBitmap.getHeight() != widthAndHeight) {
+            mBitmap = Bitmap.createBitmap(widthAndHeight, widthAndHeight, Bitmap.Config.ARGB_8888);
             final Canvas bitCanvas = new Canvas(mBitmap);
-            slowDraw(bitCanvas, 0, 0, w, h);
+            slowDraw(bitCanvas, 0, 0, widthAndHeight, widthAndHeight);
         }
         canvas.drawBitmap(mBitmap, 0, 0, null);
     }
@@ -231,7 +233,7 @@ public class Cat extends Drawable {
 
     }
 
-    public Bitmap createBitmap(int w, int h) {
+    Bitmap createBitmap(int w, int h) {
         if (mBitmap != null && mBitmap.getWidth() == w && mBitmap.getHeight() == h) {
             return mBitmap.copy(mBitmap.getConfig(), true);
         }
@@ -240,12 +242,12 @@ public class Cat extends Drawable {
         return result;
     }
 
-    public Icon createLargeIcon(Context context) {
+    Icon createLargeIcon(Context context) {
         final Resources res = context.getResources();
         final int w = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
         final int h = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
 
-        Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        final Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(result);
         final Paint pt = new Paint();
         float[] hsv = new float[3];
@@ -278,50 +280,50 @@ public class Cat extends Drawable {
         return PixelFormat.TRANSLUCENT;
     }
 
-    public String getName() {
+    String getName() {
         return mName;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.mName = name;
     }
 
-    public int getBodyColor() {
+    private int getBodyColor() {
         return mBodyColor;
     }
 
-    public static class CatParts {
-        public Drawable leftEar;
-        public Drawable rightEar;
-        public Drawable rightEarInside;
-        public Drawable leftEarInside;
-        public Drawable head;
-        public Drawable faceSpot;
-        public Drawable cap;
-        public Drawable mouth;
-        public Drawable body;
-        public Drawable foot1;
-        public Drawable leg1;
-        public Drawable foot2;
-        public Drawable leg2;
-        public Drawable foot3;
-        public Drawable leg3;
-        public Drawable foot4;
-        public Drawable leg4;
-        public Drawable tail;
-        public Drawable leg2Shadow;
-        public Drawable tailShadow;
-        public Drawable tailCap;
-        public Drawable belly;
-        public Drawable back;
-        public Drawable rightEye;
-        public Drawable leftEye;
-        public Drawable nose;
-        public Drawable bowtie;
-        public Drawable collar;
-        public Drawable[] drawingOrder;
+    private static class CatParts {
+        Drawable leftEar;
+        Drawable rightEar;
+        Drawable rightEarInside;
+        Drawable leftEarInside;
+        Drawable head;
+        Drawable faceSpot;
+        Drawable cap;
+        Drawable mouth;
+        Drawable body;
+        Drawable foot1;
+        Drawable leg1;
+        Drawable foot2;
+        Drawable leg2;
+        Drawable foot3;
+        Drawable leg3;
+        Drawable foot4;
+        Drawable leg4;
+        Drawable tail;
+        Drawable leg2Shadow;
+        Drawable tailShadow;
+        Drawable tailCap;
+        Drawable belly;
+        Drawable back;
+        Drawable rightEye;
+        Drawable leftEye;
+        Drawable nose;
+        Drawable bowtie;
+        Drawable collar;
+        Drawable[] drawingOrder;
 
-        public CatParts(Context context) {
+        CatParts(Context context) {
             body = context.getDrawable(R.drawable.body);
             head = context.getDrawable(R.drawable.head);
             leg1 = context.getDrawable(R.drawable.leg1);

@@ -1,0 +1,23 @@
+aar_import(
+    name = "recyclerview-v7-25.3.1",
+    aar = "recyclerview-v7/25.3.1/recyclerview-v7-25.3.1.aar",
+    visibility = ["//visibility:public"],
+)
+
+java_import(
+    name = "support-annotations-25.3.1",
+    jars = ["support-annotations/25.3.1/support-annotations-25.3.1.jar"],
+    visibility = ["//visibility:public"],
+)
+
+aar_import(
+    name = "support-compat-25.3.1",
+    aar = "support-compat/25.3.1/support-compat-25.3.1.aar",
+    visibility = ["//visibility:public"],
+)
+
+aar_import(
+    name = "support-core-ui-25.3.1",
+    aar = "support-core-ui/25.3.1/support-core-ui-25.3.1.aar",
+    visibility = ["//visibility:public"],
+)

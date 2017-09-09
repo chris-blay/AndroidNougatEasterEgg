@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -29,7 +30,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore.Images;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -42,24 +43,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.covertbagel.neko.R;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class NekoLand extends Activity implements PrefState.PrefsListener {
-    public static boolean DEBUG = false;
-    public static boolean DEBUG_NOTIFICATIONS = false;
 
+    private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
+    private static final boolean CAT_GEN = false;
 
-    private static boolean CAT_GEN = false;
     private PrefState mPrefs;
     private CatAdapter mAdapter;
     private Cat mPendingShareCat;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,7 +107,6 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         } else {
             showNameDialog(cat);
         }
-//      noman.notify(1, cat.buildNotification(NekoLand.this).build());
     }
 
     private void onCatRemove(Cat cat) {
@@ -148,7 +144,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
 
         private Cat[] mCats;
 
-        public void setCats(Cat[] cats) {
+        void setCats(Cat[] cats) {
             mCats = cats;
             notifyDataSetChanged();
         }
@@ -200,7 +196,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                     Cat cat = mCats[holder.getAdapterPosition()];
                     if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED) {
-                        mPendingShareCat = cat; 
+                        mPendingShareCat = cat;
                         requestPermissions(
                                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                 STORAGE_PERM_REQUEST);
@@ -217,41 +213,43 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         }
     }
 
-    private void shareCat(Cat cat) {
+    private void shareCat(final Cat cat) {
         final File dir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 getString(R.string.directory_name));
         if (!dir.exists() && !dir.mkdirs()) {
-            Log.e("NekoLand", "save: error: can't create Pictures directory");
+            Log.e(TAG, "save: error: can't create Pictures directory");
             return;
         }
         final File png = new File(dir, cat.getName().replaceAll("[/ #:]+", "_") + ".png");
-        Bitmap bitmap = cat.createBitmap(512, 512);
+        final Bitmap bitmap = cat.createBitmap(512, 512);
         if (bitmap != null) {
             try {
-                OutputStream os = new FileOutputStream(png);
+                final OutputStream os = new FileOutputStream(png);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
                 os.close();
-                MediaScannerConnection.scanFile(
-                        this,
-                        new String[] {png.toString()},
+                MediaScannerConnection.scanFile(this, new String[] {png.toString()},
                         new String[] {"image/png"},
-                        null);
-                Uri uri = Uri.fromFile(png);
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
-                intent.setType("image/png");
-                startActivity(Intent.createChooser(intent, null));
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String path, Uri uri) {
+                                final Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                                intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                intent.setType("image/png");
+                                startActivity(Intent.createChooser(intent, null));
+                            }
+                        });
             } catch (IOException e) {
-                Log.e("NekoLand", "save: error: " + e);
+                Log.e(TAG, "save: error: " + e);
             }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(
+            int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (requestCode == STORAGE_PERM_REQUEST) {
             if (mPendingShareCat != null) {
                 shareCat(mPendingShareCat);
@@ -267,7 +265,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         private final View delete;
         private final View share;
 
-        public CatHolder(View itemView) {
+        CatHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(android.R.id.icon);
             textView = (TextView) itemView.findViewById(android.R.id.title);

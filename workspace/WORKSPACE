@@ -1,0 +1,13 @@
+android_sdk_repository(
+    name = "androidsdk",
+    path = "/opt/android-sdk",
+    api_level = 24,
+    build_tools_version = "26.0.1",
+)
+
+new_local_repository(
+    name = "com_android_support",
+    path = "/opt/android-sdk/extras/android/m2repository/com/android/support",
+    build_file = "BUILD.com_android_support",
+)
+

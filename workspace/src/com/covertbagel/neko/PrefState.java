@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -25,34 +26,32 @@ import java.util.Map;
 public class PrefState implements OnSharedPreferenceChangeListener {
 
     private static final String FILE_NAME = "mPrefs";
-
     private static final String FOOD_STATE = "food";
-
     private static final String CAT_KEY_PREFIX = "cat:";
 
     private final Context mContext;
     private final SharedPreferences mPrefs;
     private PrefsListener mListener;
 
-    public PrefState(Context context) {
+    PrefState(Context context) {
         mContext = context;
         mPrefs = mContext.getSharedPreferences(FILE_NAME, 0);
     }
 
     // Can also be used for renaming.
-    public void addCat(Cat cat) {
+    void addCat(Cat cat) {
         mPrefs.edit()
               .putString(CAT_KEY_PREFIX + String.valueOf(cat.getSeed()), cat.getName())
-              .commit();
+              .apply();
     }
 
-    public void removeCat(Cat cat) {
+    void removeCat(Cat cat) {
         mPrefs.edit()
                 .remove(CAT_KEY_PREFIX + String.valueOf(cat.getSeed()))
-                .commit();
+                .apply();
     }
 
-    public List<Cat> getCats() {
+    List<Cat> getCats() {
         ArrayList<Cat> cats = new ArrayList<>();
         Map<String, ?> map = mPrefs.getAll();
         for (String key : map.keySet()) {
@@ -66,15 +65,15 @@ public class PrefState implements OnSharedPreferenceChangeListener {
         return cats;
     }
 
-    public int getFoodState() {
+    int getFoodState() {
         return mPrefs.getInt(FOOD_STATE, 0);
     }
 
-    public void setFoodState(int foodState) {
-        mPrefs.edit().putInt(FOOD_STATE, foodState).commit();
+    void setFoodState(int foodState) {
+        mPrefs.edit().putInt(FOOD_STATE, foodState).apply();
     }
 
-    public void setListener(PrefsListener listener) {
+    void setListener(PrefsListener listener) {
         mListener = listener;
         if (mListener != null) {
             mPrefs.registerOnSharedPreferenceChangeListener(this);
@@ -88,7 +87,7 @@ public class PrefState implements OnSharedPreferenceChangeListener {
         mListener.onPrefsChanged();
     }
 
-    public interface PrefsListener {
+    interface PrefsListener {
         void onPrefsChanged();
     }
 }

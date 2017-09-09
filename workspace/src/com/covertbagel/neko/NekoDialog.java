@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,9 +15,9 @@
 
 package com.covertbagel.neko;
 
-import android.support.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,15 +26,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.covertbagel.neko.R;
-
 import java.util.ArrayList;
 
 public class NekoDialog extends Dialog {
 
     private final Adapter mAdapter;
 
-    public NekoDialog(@NonNull Context context) {
+    NekoDialog(@NonNull Context context) {
         super(context, android.R.style.Theme_Material_Dialog_NoActionBar);
         RecyclerView view = new RecyclerView(getContext());
         mAdapter = new Adapter(getContext());
@@ -55,12 +54,12 @@ public class NekoDialog extends Dialog {
         dismiss();
     }
 
-    private class Adapter extends RecyclerView.Adapter<Holder> {
+    private final class Adapter extends RecyclerView.Adapter<Holder> {
 
         private final Context mContext;
         private final ArrayList<Food> mFoods = new ArrayList<>();
 
-        public Adapter(Context context) {
+        Adapter(Context context) {
             mContext = context;
             int[] foods = context.getResources().getIntArray(R.array.food_names);
             // skip food 0, you can't choose it
@@ -96,9 +95,9 @@ public class NekoDialog extends Dialog {
         }
     }
 
-    public static class Holder extends RecyclerView.ViewHolder {
+    private static final class Holder extends RecyclerView.ViewHolder {
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
         }
     }

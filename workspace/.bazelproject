@@ -1,0 +1,7 @@
+android_sdk_platform: android-24
+
+directories:
+  .
+
+targets:
+  //:AndroidNougatEasterEgg
