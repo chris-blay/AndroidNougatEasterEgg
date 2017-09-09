@@ -5,6 +5,7 @@ android_binary(
     custom_package = "com.covertbagel.neko",
     manifest = "AndroidManifest.xml",
     resource_files = glob(["res/**"]),
-    #proguard_specs = ["proguard-rules.txt"],
+    shrink_resources = 1,
+    crunch_png = 1,
 )
 
