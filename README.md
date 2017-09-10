@@ -1,12 +1,26 @@
 # Android Nougat Easter Egg (a.k.a. "Android Neko")
 
 I wanted to keep playing this game on Android O, so lifted the source from
-AOSP, cleaned it up a bit, fixed sharing, and put it in a Bazel workspace.
+AOSP, cleaned it up a bit, fixed some things, put it in a Bazel workspace,
+and published it on Google Play Store.
 
-AFAIK it's not possible to transfer cats from the system app on Nougat to
-this regular app (since they have different package names) but it's also
-possible to install/use this on Nougat directly so that all your hard cat
-efforts do not go to waste later when upgrading Android.
+## How to install
+
+Get it from the Google Play Store at
+https://play.google.com/store/apps/details?id=com.covertbagel.neko
+or download `AndroidNougatEasterEgg.apk` and sideload it. It's exactly
+the same as the version published on Play Store.
+
+## How to keep your cats
+
+There is experimental support for teleporting cats from the Android system
+easter egg app to this one in `teleport_cats`. It has only been tested on
+Debian-based Linux distributions but hopefully works on Mac OS X and Cygwin
+too.
+
+It requires a Java runtime, Android SDK platform tools (really just ADB),
+and Android Backup Extractor JAR available at
+https://sourceforge.net/projects/adbextractor/.
 
 ## How to build
 
@@ -19,10 +33,6 @@ then it's really easy to build.
   `/opt/android-sdk` but it's easy enough to change that to wherever you like.
   Just modify the two references in `workspace/WORKSPACE`.
 - Go to `workspace` and run `bazel build :AndroidNougatEasterEgg`.
-
-## How to install
-
-`bazel mobile-install :AndroidNougatEasterEgg`
 
 ## How to hack
 
