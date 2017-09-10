@@ -31,7 +31,6 @@ public class NekoService extends JobService {
 
     private static final int JOB_ID = 42;
     private static final int CAT_NOTIFICATION = 1;
-    private static final float CAT_CAPTURE_PROB = 1.0f; // generous
     private static final long SECONDS = 1000;
     private static final long MINUTES = 60 * SECONDS;
     private static final long INTERVAL_FLEX = 5 * MINUTES;
@@ -44,21 +43,18 @@ public class NekoService extends JobService {
         if (food != 0) {
             prefs.setFoodState(0); // nom
             final Random rng = new Random();
-            if (rng.nextFloat() <= CAT_CAPTURE_PROB) {
-                final Cat cat;
-                final List<Cat> cats = prefs.getCats();
-                final int[] probs = getResources().getIntArray(R.array.food_new_cat_prob);
-                final float new_cat_prob = (float)((food < probs.length) ? probs[food] : 50) / 100f;
-                if (cats.size() == 0 || rng.nextFloat() <= new_cat_prob) {
-                    cat = Cat.create(this);
-                    prefs.addCat(cat);
-                } else {
-                    cat = cats.get(rng.nextInt(cats.size()));
-                }
-                final Notification.Builder builder = cat.buildNotification(this);
-                getSystemService(NotificationManager.class)
-                        .notify(CAT_NOTIFICATION, builder.build());
+            final Cat cat;
+            final List<Cat> cats = prefs.getCats();
+            final int[] probs = getResources().getIntArray(R.array.food_new_cat_prob);
+            final float new_cat_prob = (float)((food < probs.length) ? probs[food] : 50) / 100f;
+            if (cats.size() == 0 || rng.nextFloat() <= new_cat_prob) {
+                cat = Cat.create(this);
+                prefs.addCat(cat);
+            } else {
+                cat = cats.get(rng.nextInt(cats.size()));
             }
+            final Notification.Builder builder = cat.buildNotification(this);
+            getSystemService(NotificationManager.class).notify(CAT_NOTIFICATION, builder.build());
         }
         cancelJob(this);
         return false;
