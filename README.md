@@ -31,7 +31,7 @@ then it's really easy to build.
   in your local Android SDK installation.
 - This project is configured to look for your Android SDK installation at
   `/opt/android-sdk` but it's easy enough to change that to wherever you like.
-  Just modify the two references in `workspace/WORKSPACE`.
+  Just modify the one reference in `workspace/WORKSPACE`.
 - Go to `workspace` and run `bazel build :AndroidNougatEasterEgg`.
 
 ## How to hack
