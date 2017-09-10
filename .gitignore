@@ -1,10 +1,9 @@
-AndroidNougatEasterEgg
+AndroidNougatEasterEgg/.bazelproject
+AndroidNougatEasterEgg/.blaze
+AndroidNougatEasterEgg/.idea
 teleport_cats/abe.jar
 teleport_cats/adb
-teleport_cats/apps
 teleport_cats/com.android.egg.ab
-teleport_cats/com.android.egg.tar
 teleport_cats/com.covertbagel.neko.ab
-teleport_cats/com.covertbagel.neko.tar
 workspace/bazel-*
 workspace/gen
