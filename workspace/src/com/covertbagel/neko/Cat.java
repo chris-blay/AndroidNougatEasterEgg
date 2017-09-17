@@ -164,9 +164,9 @@ public class Cat extends Drawable {
             tint(0xFFFFFFFF, D.foot1, D.foot2, D.foot3, D.foot4);
         } else {
             if (nsr.nextFloat() < 0.25f) {
-                tint(0xFFFFFFFF, D.foot1, D.foot2);
+                tint(0xFFFFFFFF, D.foot1, D.foot3);
             } else if (nsr.nextFloat() < 0.25f) {
-                tint(0xFFFFFFFF, D.foot3, D.foot4);
+                tint(0xFFFFFFFF, D.foot2, D.foot4);
             } else if (nsr.nextFloat() < 0.1f) {
                 tint(0xFFFFFFFF, (Drawable) choose(nsr, D.foot1, D.foot2, D.foot3, D.foot4));
             }
