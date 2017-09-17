@@ -57,7 +57,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
     private static final boolean CAT_GEN = false;
-    private static final boolean SORT_CATS = false;
+    private static final boolean SORT_CATS = true;
     private static final int EXPORT_BITMAP_SIZE = 600;
 
     private PrefState mPrefs;
