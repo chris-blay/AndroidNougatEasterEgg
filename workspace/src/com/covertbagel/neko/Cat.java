@@ -135,8 +135,7 @@ public class Cat extends Drawable {
         D = new CatParts(context);
         mSeed = seed;
 
-        setName(context.getString(R.string.default_cat_name,
-                String.valueOf(mSeed).substring(0, 3)));
+        setName(context.getString(R.string.default_cat_name, String.valueOf(seed % 1000)));
 
         final Random nsr = notSoRandom(seed);
 
