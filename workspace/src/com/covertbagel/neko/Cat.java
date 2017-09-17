@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.support.annotation.NonNull;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -193,7 +194,7 @@ public class Cat extends Drawable {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return new Notification.Builder(context)
                 .setSmallIcon(Icon.createWithResource(context, R.drawable.stat_icon))
-                .setLargeIcon(createLargeIcon(context))
+                .setLargeIcon(createNotificationLargeIcon(context))
                 .setColor(getBodyColor())
                 .setPriority(Notification.PRIORITY_LOW)
                 .setContentTitle(context.getString(R.string.notification_title))
@@ -242,27 +243,37 @@ public class Cat extends Drawable {
         return result;
     }
 
-    Icon createLargeIcon(Context context) {
-        final Resources res = context.getResources();
-        final int w = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
-        final int h = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+    private static Icon recompressIconBitmapIntoIcon(Bitmap bitmap) {
+        final ByteArrayOutputStream ostream = new ByteArrayOutputStream(
+                bitmap.getWidth() * bitmap.getHeight() * 2); // guess 50% compression
+        final boolean ok = bitmap.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+        return ok ? Icon.createWithData(ostream.toByteArray(), 0, ostream.size()) : null;
+    }
 
+    private Icon createNotificationLargeIcon(Context context) {
+        final Resources res = context.getResources();
+        final int w = 2 * res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+        final int h = 2 * res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+        return recompressIconBitmapIntoIcon(createIconBitmap(w, h));
+    }
+
+    private Bitmap createIconBitmap(int w, int h) {
         final Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(result);
         final Paint pt = new Paint();
         float[] hsv = new float[3];
         Color.colorToHSV(mBodyColor, hsv);
-        hsv[2] = (hsv[2]>0.5f)
-                ? (hsv[2] - 0.25f)
-                : (hsv[2] + 0.25f);
+        hsv[2] = (hsv[2] > 0.5f) ? (hsv[2] - 0.25f) : (hsv[2] + 0.25f);
         pt.setColor(Color.HSVToColor(hsv));
-        float r = w/2;
+        final float r = w / 2;
         canvas.drawCircle(r, r, r, pt);
-        int m = w/10;
+        final int m = w / 10;
+        slowDraw(canvas, m, m, w - m - m, h - m - m);
+        return result;
+    }
 
-        slowDraw(canvas, m, m, w-m-m, h-m-m);
-
-        return Icon.createWithBitmap(result);
+    Icon createIcon(int w, int h) {
+        return Icon.createWithBitmap(createIconBitmap(w, h));
     }
 
     @Override

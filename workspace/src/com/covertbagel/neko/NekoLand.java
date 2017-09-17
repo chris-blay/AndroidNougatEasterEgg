@@ -141,7 +141,9 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         final EditText text = (EditText) view.findViewById(android.R.id.edit);
         text.setText(cat.getName());
         text.setSelection(cat.getName().length());
-        Drawable catIcon = cat.createLargeIcon(this).loadDrawable(this);
+        final int size = context.getResources()
+                .getDimensionPixelSize(android.R.dimen.app_icon_size);
+        final Drawable catIcon = cat.createIcon(size, size).loadDrawable(this);
         new AlertDialog.Builder(context)
                 .setTitle(" ")
                 .setIcon(catIcon)
@@ -203,7 +205,9 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         @Override
         public void onBindViewHolder(final CatHolder holder, final int position) {
             Context context = holder.itemView.getContext();
-            holder.imageView.setImageIcon(mCats[position].createLargeIcon(context));
+            final int size = context.getResources()
+                    .getDimensionPixelSize(R.dimen.neko_display_size);
+            holder.imageView.setImageIcon(mCats[position].createIcon(size, size));
             holder.textView.setText(mCats[position].getName());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
