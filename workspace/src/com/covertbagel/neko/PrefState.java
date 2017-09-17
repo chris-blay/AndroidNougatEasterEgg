@@ -46,9 +46,7 @@ public class PrefState implements OnSharedPreferenceChangeListener {
     }
 
     void removeCat(Cat cat) {
-        mPrefs.edit()
-                .remove(CAT_KEY_PREFIX + String.valueOf(cat.getSeed()))
-                .apply();
+        mPrefs.edit().remove(CAT_KEY_PREFIX + String.valueOf(cat.getSeed())).apply();
     }
 
     List<Cat> getCats() {
