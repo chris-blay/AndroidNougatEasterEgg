@@ -25,6 +25,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -47,12 +48,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class NekoLand extends Activity implements PrefState.PrefsListener {
 
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
     private static final boolean CAT_GEN = false;
+    private static final boolean SORT_CATS = false;
 
     private PrefState mPrefs;
     private CatAdapter mAdapter;
@@ -85,14 +90,28 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
     }
 
     private void updateCats() {
-        Cat[] cats;
+        final Cat[] cats;
         if (CAT_GEN) {
             cats = new Cat[50];
             for (int i = 0; i < cats.length; i++) {
                 cats[i] = Cat.create(this);
             }
         } else {
-            cats = mPrefs.getCats().toArray(new Cat[0]);
+            final List<Cat> list = mPrefs.getCats();
+            if (SORT_CATS) {
+                final float[] hsv = new float[3];
+                Collections.sort(list, new Comparator<Cat>() {
+                    @Override
+                    public int compare(Cat cat, Cat cat2) {
+                        Color.colorToHSV(cat.getBodyColor(), hsv);
+                        final float bodyH1 = hsv[0];
+                        Color.colorToHSV(cat2.getBodyColor(), hsv);
+                        final float bodyH2 = hsv[0];
+                        return Float.compare(bodyH1, bodyH2);
+                    }
+                });
+            }
+            cats = list.toArray(new Cat[list.size()]);
         }
         mAdapter.setCats(cats);
     }

@@ -288,7 +288,7 @@ public class Cat extends Drawable {
         this.mName = name;
     }
 
-    private int getBodyColor() {
+    int getBodyColor() {
         return mBodyColor;
     }
 
