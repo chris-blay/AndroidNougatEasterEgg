@@ -50,14 +50,12 @@ public class PrefState implements OnSharedPreferenceChangeListener {
     }
 
     List<Cat> getCats() {
-        ArrayList<Cat> cats = new ArrayList<>();
-        Map<String, ?> map = mPrefs.getAll();
+        final List<Cat> cats = new ArrayList<>();
+        final Map<String, ?> map = mPrefs.getAll();
         for (String key : map.keySet()) {
             if (key.startsWith(CAT_KEY_PREFIX)) {
-                long seed = Long.parseLong(key.substring(CAT_KEY_PREFIX.length()));
-                Cat cat = new Cat(mContext, seed);
-                cat.setName(String.valueOf(map.get(key)));
-                cats.add(cat);
+                final long seed = Long.parseLong(key.substring(CAT_KEY_PREFIX.length()));
+                cats.add(new Cat(mContext, seed, String.valueOf(map.get(key))));
             }
         }
         return cats;

@@ -16,7 +16,6 @@
 package com.covertbagel.neko;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -68,13 +67,6 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.neko_activity);
-        final ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setLogo(Cat.create(this));
-            actionBar.setDisplayUseLogoEnabled(false);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
-
         mPrefs = new PrefState(this);
         mPrefs.setListener(this);
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.holder);

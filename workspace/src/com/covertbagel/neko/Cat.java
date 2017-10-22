@@ -32,7 +32,6 @@ import android.support.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Cat extends Drawable {
 
@@ -46,8 +45,7 @@ public class Cat extends Drawable {
 
     private synchronized Random notSoRandom(long seed) {
         if (mNotSoRandom == null) {
-            mNotSoRandom = new Random();
-            mNotSoRandom.setSeed(seed);
+            mNotSoRandom = new Random(seed);
         }
         return mNotSoRandom;
     }
@@ -131,11 +129,10 @@ public class Cat extends Drawable {
         return (r + g + b) < 0x80;
     }
 
-    Cat(Context context, long seed) {
+    Cat(Context context, long seed, String name) {
         D = new CatParts(context);
         mSeed = seed;
-
-        setName(context.getString(R.string.default_cat_name, String.valueOf(seed % 1000)));
+        setName(name);
 
         final Random nsr = notSoRandom(seed);
 
@@ -176,7 +173,6 @@ public class Cat extends Drawable {
 
         final int capColor = chooseP(nsr, isDark(mBodyColor) ? P_LIGHT_SPOT_COLORS : P_DARK_SPOT_COLORS);
         tint(capColor, D.cap);
-        //tint(chooseP(nsr, isDark(bodyColor) ? P_LIGHT_SPOT_COLORS : P_DARK_SPOT_COLORS), D.nose);
 
         final int collarColor = chooseP(nsr, P_COLLAR_COLORS);
         tint(collarColor, D.collar);
@@ -184,7 +180,9 @@ public class Cat extends Drawable {
     }
 
     static Cat create(Context context) {
-        return new Cat(context, Math.abs(ThreadLocalRandom.current().nextInt()));
+        final long seed = Math.abs(NekoService.RANDOM.nextLong());
+        return new Cat(context, seed, context.getString(
+                R.string.default_cat_name, String.valueOf(seed % 1000)));
     }
 
     Notification.Builder buildNotification(Context context) {
@@ -295,7 +293,7 @@ public class Cat extends Drawable {
     }
 
     void setName(String name) {
-        this.mName = name;
+        mName = name;
     }
 
     int getBodyColor() {

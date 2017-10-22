@@ -35,6 +35,7 @@ public class NekoService extends JobService {
     private static final long MINUTES = 60 * SECONDS;
     private static final long INTERVAL_FLEX = 5 * MINUTES;
     private static final float INTERVAL_JITTER_FRAC = 0.25f;
+    static final Random RANDOM = new Random();
 
     @Override
     public boolean onStartJob(JobParameters params) {
@@ -42,16 +43,15 @@ public class NekoService extends JobService {
         final int food = prefs.getFoodState();
         if (food != 0) {
             prefs.setFoodState(0); // nom
-            final Random rng = new Random();
             final Cat cat;
             final List<Cat> cats = prefs.getCats();
             final int[] probs = getResources().getIntArray(R.array.food_new_cat_prob);
-            final float new_cat_prob = (float)((food < probs.length) ? probs[food] : 50) / 100f;
-            if (cats.size() == 0 || rng.nextFloat() <= new_cat_prob) {
+            final float newCatProb = (float)((food < probs.length) ? probs[food] : 50) / 100f;
+            if (cats.size() == 0 || RANDOM.nextFloat() <= newCatProb) {
                 cat = Cat.create(this);
                 prefs.addCat(cat);
             } else {
-                cat = cats.get(rng.nextInt(cats.size()));
+                cat = cats.get(RANDOM.nextInt(cats.size()));
             }
             final Notification.Builder builder = cat.buildNotification(this);
             getSystemService(NotificationManager.class).notify(CAT_NOTIFICATION, builder.build());
