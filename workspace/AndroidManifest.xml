@@ -17,8 +17,8 @@ Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.covertbagel.neko"
-          android:versionCode="2"
-          android:versionName="2">
+          android:versionCode="3"
+          android:versionName="3">
 
     <uses-sdk android:minSdkVersion="24" />
 
