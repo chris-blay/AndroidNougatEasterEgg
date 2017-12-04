@@ -81,12 +81,8 @@ public class NekoDialog extends Dialog {
                     .setImageIcon(food.getIcon(mContext));
             ((TextView) holder.itemView.findViewById(R.id.text))
                     .setText(food.getName(mContext));
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onFoodSelected(mFoods.get(holder.getAdapterPosition()));
-                }
-            });
+            holder.itemView.setOnClickListener(
+                    (View v) -> onFoodSelected(mFoods.get(holder.getAdapterPosition())));
         }
 
         @Override

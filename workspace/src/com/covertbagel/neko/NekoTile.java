@@ -77,12 +77,7 @@ public class NekoTile extends TileService implements PrefState.PrefsListener {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivityAndCollapse(intent);
                 } else {
-                    unlockAndRun(new Runnable() {
-                        @Override
-                        public void run() {
-                            showNekoDialog();
-                        }
-                    });
+                    unlockAndRun(this::showNekoDialog);
                 }
             } else {
                 showNekoDialog();

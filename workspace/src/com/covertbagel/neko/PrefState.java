@@ -27,6 +27,7 @@ public class PrefState implements OnSharedPreferenceChangeListener {
 
     private static final String FILE_NAME = "mPrefs";
     private static final String FOOD_STATE = "food";
+    private static final String SORT = "sort";
     private static final String CAT_KEY_PREFIX = "cat:";
 
     private final Context mContext;
@@ -67,6 +68,15 @@ public class PrefState implements OnSharedPreferenceChangeListener {
 
     void setFoodState(int foodState) {
         mPrefs.edit().putInt(FOOD_STATE, foodState).apply();
+    }
+
+    @Sort
+    int getSort() {
+        return mPrefs.getInt(SORT, Sort.BODY_HUE);
+    }
+
+    void setSort(@Sort int sort) {
+        mPrefs.edit().putInt(SORT, sort).apply();
     }
 
     void setListener(PrefsListener listener) {

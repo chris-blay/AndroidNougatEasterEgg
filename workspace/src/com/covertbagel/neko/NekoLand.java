@@ -16,11 +16,11 @@
 package com.covertbagel.neko;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -31,13 +31,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -47,30 +50,35 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NekoLand extends Activity implements PrefState.PrefsListener {
 
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
-    private static final boolean CAT_GEN = false;
-    private static final boolean SORT_CATS = true;
+    private static final int CAT_GEN = 50; // Set to 0 to disable, N > 0 to generate N cats.
+
     private static final int EXPORT_BITMAP_SIZE = 600;
 
     private PrefState mPrefs;
+    @Sort private int mSort;
     private CatAdapter mAdapter;
     private Cat mPendingShareCat;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.neko_activity);
+        final ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayOptions(0);
+        }
         mPrefs = new PrefState(this);
         mPrefs.setListener(this);
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.holder);
+        mSort = mPrefs.getSort();
         mAdapter = new CatAdapter();
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.holder);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         updateCats();
@@ -82,35 +90,94 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         mPrefs.setListener(null);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        new MenuInflater(this).inflate(R.menu.neko_activity, menu);
+        final int checkedId;
+        switch (mSort) {
+        case Sort.CHRONOLOGICAL:
+            checkedId = R.id.sort_chronological;
+            break;
+        case Sort.BODY_HUE:
+            checkedId = R.id.sort_body_hue;
+            break;
+        case Sort.NAME:
+            checkedId = R.id.sort_name;
+            break;
+        case Sort.LEVEL:
+            checkedId = R.id.sort_level;
+            break;
+        default:
+            return true;
+        }
+        final MenuItem menuItem = menu.findItem(checkedId);
+        if (menuItem != null) {
+            menuItem.setChecked(true);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        final int itemId = item.getItemId();
+        @Sort final int newSort;
+        if (itemId == R.id.sort_chronological) {
+            newSort = Sort.CHRONOLOGICAL;
+        } else if (itemId == R.id.sort_body_hue) {
+            newSort = Sort.BODY_HUE;
+        } else if (itemId == R.id.sort_name) {
+            newSort = Sort.NAME;
+        } else if (itemId == R.id.sort_level) {
+            newSort = Sort.LEVEL;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+        if (mSort != newSort) {
+            mSort = newSort;
+            invalidateOptionsMenu();
+            mPrefs.setSort(newSort);
+        }
+        return true;
+    }
+
     private void updateCats() {
-        final Cat[] cats;
-        if (CAT_GEN) {
-            cats = new Cat[50];
-            for (int i = 0; i < cats.length; i++) {
-                cats[i] = Cat.create(this);
+        final List<Cat> cats;
+        if (CAT_GEN > 0) {
+            cats = new ArrayList<>(CAT_GEN);
+            for (int i = 0; i < CAT_GEN; i++) {
+                cats.add(Cat.create(this));
             }
         } else {
-            final List<Cat> list = mPrefs.getCats();
-            if (SORT_CATS) {
-                final float[] hsv = new float[3];
-                Collections.sort(list, new Comparator<Cat>() {
-                    @Override
-                    public int compare(Cat cat, Cat cat2) {
-                        Color.colorToHSV(cat.getBodyColor(), hsv);
-                        final float bodyH1 = hsv[0];
-                        Color.colorToHSV(cat2.getBodyColor(), hsv);
-                        final float bodyH2 = hsv[0];
-                        return Float.compare(bodyH1, bodyH2);
-                    }
-                });
-            }
-            cats = list.toArray(new Cat[list.size()]);
+            cats = mPrefs.getCats();
         }
-        mAdapter.setCats(cats);
+        switch (mSort) {
+        case Sort.CHRONOLOGICAL:
+            break; // No sorting necessary.
+        case Sort.BODY_HUE:
+            final float[] hsv = new float[3];
+            cats.sort((Cat cat, Cat cat2) -> {
+                Color.colorToHSV(cat.getBodyColor(), hsv);
+                final float bodyH1 = hsv[0];
+                Color.colorToHSV(cat2.getBodyColor(), hsv);
+                final float bodyH2 = hsv[0];
+                return Float.compare(bodyH1, bodyH2);
+            });
+            break;
+        case Sort.NAME:
+            //cats.sort(Comparator.comparing(Cat::getName));
+            cats.sort((Cat cat, Cat cat2) -> cat.getName().compareTo(cat2.getName()));
+            break;
+        case Sort.LEVEL:
+            //cats.sort(Comparator.comparingLong(Cat::getSeed));
+            cats.sort((Cat cat, Cat cat2) -> Float.compare(cat.getSeed(), cat2.getSeed()));
+            break;
+        }
+        mAdapter.setCats(cats.toArray(new Cat[cats.size()]));
     }
 
     private void onCatClick(Cat cat) {
-        if (CAT_GEN) {
+        if (CAT_GEN > 0) {
             mPrefs.addCat(cat);
             new AlertDialog.Builder(NekoLand.this)
                     .setTitle("Cat added")
@@ -140,12 +207,9 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                 .setTitle(" ")
                 .setIcon(catIcon)
                 .setView(view)
-                .setPositiveButton(android.R.string.ok, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        cat.setName(text.getText().toString().trim());
-                        mPrefs.addCat(cat);
-                    }
+                .setPositiveButton(android.R.string.ok, (DialogInterface dialog, int which) -> {
+                    cat.setName(text.getText().toString().trim());
+                    mPrefs.addCat(cat);
                 }).show();
     }
 
@@ -175,22 +239,13 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                 group.setAlpha(0);
                 group.setVisibility(View.VISIBLE);
                 group.animate().alpha(1.0f).setDuration(333);
-                final Runnable hideAction = new Runnable() {
-                    @Override
-                    public void run() {
-                        setContextGroupVisible(holder, false);
-                    }
-                };
+                final Runnable hideAction = () -> setContextGroupVisible(holder, false);
                 group.setTag(hideAction);
                 group.postDelayed(hideAction, 5000);
             } else if (!vis && group.getVisibility() == View.VISIBLE) {
                 group.removeCallbacks((Runnable) group.getTag());
-                group.animate().alpha(0f).setDuration(250).withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        group.setVisibility(View.INVISIBLE);
-                    }
-                });
+                group.animate().alpha(0f).setDuration(250).withEndAction(
+                        () -> group.setVisibility(View.INVISIBLE));
             }
         }
 
@@ -201,52 +256,35 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                     .getDimensionPixelSize(R.dimen.neko_display_size);
             holder.imageView.setImageIcon(mCats[position].createIcon(size, size));
             holder.textView.setText(mCats[position].getName());
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onCatClick(mCats[holder.getAdapterPosition()]);
-                }
+            holder.itemView.setOnClickListener(
+                    (View v) -> onCatClick(mCats[holder.getAdapterPosition()]));
+            holder.itemView.setOnLongClickListener((View v) -> {
+                setContextGroupVisible(holder, true);
+                return true;
             });
-            holder.itemView.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    setContextGroupVisible(holder, true);
-                    return true;
-                }
+            holder.delete.setOnClickListener((View v) -> {
+                setContextGroupVisible(holder, false);
+                new AlertDialog.Builder(NekoLand.this)
+                    .setTitle(getString(R.string.confirm_delete, mCats[position].getName()))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(
+                            android.R.string.ok,
+                            (DialogInterface dialog, int which) ->
+                                    onCatRemove(mCats[holder.getAdapterPosition()]))
+                    .show();
             });
-            holder.delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setContextGroupVisible(holder, false);
-                    new AlertDialog.Builder(NekoLand.this)
-                        .setTitle(getString(R.string.confirm_delete, mCats[position].getName()))
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(
-                                android.R.string.ok,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        onCatRemove(mCats[holder.getAdapterPosition()]);
-                                    }
-                                })
-                        .show();
+            holder.share.setOnClickListener((View v) -> {
+                setContextGroupVisible(holder, false);
+                Cat cat = mCats[holder.getAdapterPosition()];
+                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    mPendingShareCat = cat;
+                    requestPermissions(
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            STORAGE_PERM_REQUEST);
+                    return;
                 }
-            });
-            holder.share.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setContextGroupVisible(holder, false);
-                    Cat cat = mCats[holder.getAdapterPosition()];
-                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        mPendingShareCat = cat;
-                        requestPermissions(
-                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                STORAGE_PERM_REQUEST);
-                        return;
-                    }
-                    shareCat(cat);
-                }
+                shareCat(cat);
             });
         }
 
@@ -273,16 +311,13 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                 os.close();
                 MediaScannerConnection.scanFile(this, new String[] {png.toString()},
                         new String[] {"image/png"},
-                        new MediaScannerConnection.OnScanCompletedListener() {
-                            @Override
-                            public void onScanCompleted(String path, Uri uri) {
-                                final Intent intent = new Intent(Intent.ACTION_SEND);
-                                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                                intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                intent.setType("image/png");
-                                startActivity(Intent.createChooser(intent, null));
-                            }
+                        (String path, Uri uri) -> {
+                            final Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.putExtra(Intent.EXTRA_STREAM, uri);
+                            intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            intent.setType("image/png");
+                            startActivity(Intent.createChooser(intent, null));
                         });
             } catch (IOException e) {
                 Log.e(TAG, "save: error: " + e);
