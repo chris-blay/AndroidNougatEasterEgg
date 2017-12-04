@@ -57,7 +57,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
 
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
-    private static final int CAT_GEN = 50; // Set to 0 to disable, N > 0 to generate N cats.
+    private static final int CAT_GEN = 0; // Set to 0 to disable, N > 0 to generate N cats.
 
     private static final int EXPORT_BITMAP_SIZE = 600;
 
