@@ -23,7 +23,7 @@
     <string name="directory_name" translatable="false">Cats</string>
     <string name="confirm_delete" translatable="false">Forget %s?</string>
     <string name="sort" translatable="false">Sort</string>
-    <string name="sort_chronological" translatable="false">Arrival</string>
+    <string name="sort_legacy" translatable="false">Legacy</string>
     <string name="sort_body_hue" translatable="false">Body Hue</string>
     <string name="sort_name" translatable="false">Name</string>
     <string name="sort_level" translatable="false">Level</string>

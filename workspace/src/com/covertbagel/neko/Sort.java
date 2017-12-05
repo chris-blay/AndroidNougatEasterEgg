@@ -19,15 +19,15 @@ import android.support.annotation.IntDef;
 import java.lang.annotation.Retention;
 
 import static com.covertbagel.neko.Sort.BODY_HUE;
-import static com.covertbagel.neko.Sort.CHRONOLOGICAL;
+import static com.covertbagel.neko.Sort.LEGACY;
 import static com.covertbagel.neko.Sort.LEVEL;
 import static com.covertbagel.neko.Sort.NAME;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 @Retention(SOURCE)
-@IntDef({CHRONOLOGICAL, BODY_HUE, NAME, LEVEL})
+@IntDef({LEGACY, BODY_HUE, NAME, LEVEL})
 @interface Sort {
-    int CHRONOLOGICAL = 0;
+    int LEGACY = 0;
     int BODY_HUE = 1;
     int NAME = 2;
     int LEVEL = 3;

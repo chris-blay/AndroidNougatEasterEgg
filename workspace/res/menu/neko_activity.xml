@@ -22,8 +22,8 @@
     <menu>
       <group android:checkableBehavior="single">
         <item
-            android:id="@+id/sort_chronological"
-            android:title="@string/sort_chronological"/>
+            android:id="@+id/sort_legacy"
+            android:title="@string/sort_legacy"/>
         <item
             android:id="@+id/sort_body_hue"
             android:title="@string/sort_body_hue"/>

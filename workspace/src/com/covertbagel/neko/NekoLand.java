@@ -58,7 +58,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
     private static final int CAT_GEN = 0; // Set to 0 to disable, N > 0 to generate N cats.
-
+    private static final String IMAGE_PNG = "image/png";
     private static final int EXPORT_BITMAP_SIZE = 600;
 
     private PrefState mPrefs;
@@ -96,8 +96,8 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
         new MenuInflater(this).inflate(R.menu.neko_activity, menu);
         final int checkedId;
         switch (mSort) {
-        case Sort.CHRONOLOGICAL:
-            checkedId = R.id.sort_chronological;
+        case Sort.LEGACY:
+            checkedId = R.id.sort_legacy;
             break;
         case Sort.BODY_HUE:
             checkedId = R.id.sort_body_hue;
@@ -122,8 +122,8 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         final int itemId = item.getItemId();
         @Sort final int newSort;
-        if (itemId == R.id.sort_chronological) {
-            newSort = Sort.CHRONOLOGICAL;
+        if (itemId == R.id.sort_legacy) {
+            newSort = Sort.LEGACY;
         } else if (itemId == R.id.sort_body_hue) {
             newSort = Sort.BODY_HUE;
         } else if (itemId == R.id.sort_name) {
@@ -152,7 +152,7 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
             cats = mPrefs.getCats();
         }
         switch (mSort) {
-        case Sort.CHRONOLOGICAL:
+        case Sort.LEGACY:
             break; // No sorting necessary.
         case Sort.BODY_HUE:
             final float[] hsv = new float[3];
@@ -310,13 +310,13 @@ public class NekoLand extends Activity implements PrefState.PrefsListener {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 0, os);
                 os.close();
                 MediaScannerConnection.scanFile(this, new String[] {png.toString()},
-                        new String[] {"image/png"},
+                        new String[] {IMAGE_PNG},
                         (String path, Uri uri) -> {
                             final Intent intent = new Intent(Intent.ACTION_SEND);
                             intent.putExtra(Intent.EXTRA_STREAM, uri);
                             intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
                             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            intent.setType("image/png");
+                            intent.setType(IMAGE_PNG);
                             startActivity(Intent.createChooser(intent, null));
                         });
             } catch (IOException e) {
