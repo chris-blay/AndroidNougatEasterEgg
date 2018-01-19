@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -18,12 +18,15 @@ package com.covertbagel.neko;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class PrefState implements OnSharedPreferenceChangeListener {
+public final class PrefState implements OnSharedPreferenceChangeListener {
 
     private static final String FILE_NAME = "mPrefs";
     private static final String FOOD_STATE = "food";
@@ -53,11 +56,26 @@ public class PrefState implements OnSharedPreferenceChangeListener {
     List<Cat> getCats() {
         final List<Cat> cats = new ArrayList<>();
         final Map<String, ?> map = mPrefs.getAll();
+        final Set<String> invalidCatKeys = new HashSet<>();
         for (String key : map.keySet()) {
             if (key.startsWith(CAT_KEY_PREFIX)) {
-                final long seed = Long.parseLong(key.substring(CAT_KEY_PREFIX.length()));
+                final long seed;
+                try {
+                    seed = Long.parseLong(key.substring(CAT_KEY_PREFIX.length()));
+                } catch (NumberFormatException exception) {
+                    invalidCatKeys.add(key);
+                    continue;
+                }
                 cats.add(new Cat(mContext, seed, String.valueOf(map.get(key))));
             }
+        }
+        if (!invalidCatKeys.isEmpty()) {
+            Log.w("PrefState", "Removing invalid cat keys " + invalidCatKeys);
+            final SharedPreferences.Editor editor = mPrefs.edit();
+            for (String key : invalidCatKeys) {
+                editor.remove(key);
+            }
+            editor.apply();
         }
         return cats;
     }

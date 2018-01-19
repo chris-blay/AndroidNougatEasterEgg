@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import android.content.Intent;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
-public class NekoTile extends TileService implements PrefState.PrefsListener {
+public final class NekoTile extends TileService implements PrefState.PrefsListener {
 
     private PrefState mPrefs;
 

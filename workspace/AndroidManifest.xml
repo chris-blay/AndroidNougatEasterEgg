@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright (C) 2016 The Android Open Source Project
-  Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+  Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.covertbagel.neko"
-          android:versionCode="4"
-          android:versionName="4">
+          android:versionCode="5"
+          android:versionName="5">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="24"
               tools:ignore="OldTargetApi"/>

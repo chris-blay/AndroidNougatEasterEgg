@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+# Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,5 @@ android_sdk_repository(
     name = "androidsdk",
     path = "/opt/android-sdk",
     api_level = 24,
-    build_tools_version = "27.0.1",
+    build_tools_version = "27.0.3",
 )
-

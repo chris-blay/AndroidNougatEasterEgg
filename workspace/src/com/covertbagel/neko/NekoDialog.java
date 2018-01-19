@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class NekoDialog extends Dialog {
+public final class NekoDialog extends Dialog {
 
     private final Adapter mAdapter;
 

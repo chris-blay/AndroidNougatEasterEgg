@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,6 @@ package com.covertbagel.neko;
 
 import android.Manifest;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,7 +52,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NekoLand extends Activity implements PrefState.PrefsListener {
+public final class NekoLand extends BaseActivity implements PrefState.PrefsListener {
 
     private static final String TAG = "NekoLand";
     private static final int STORAGE_PERM_REQUEST = 123;
