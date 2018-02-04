@@ -27,7 +27,7 @@ https://sourceforge.net/projects/adbextractor/.
 This project uses Bazel to build. You'll need to get Bazel setup first but
 then it's really easy to build.
 
-- Android SDK 24, build tools 26.0.1, and Android Support Library need to be
+- Android SDK 24, build tools 27.0.3, and Android Support Library need to be
   in your local Android SDK installation.
 - This project is configured to look for your Android SDK installation at
   `/opt/android-sdk` but it's easy enough to change that to wherever you like.
