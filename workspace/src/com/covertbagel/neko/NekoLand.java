@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,19 +16,26 @@
 package com.covertbagel.neko;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -59,6 +66,15 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
     private static final int CAT_GEN = 0; // Set to 0 to disable, N > 0 to generate N cats.
     private static final String IMAGE_PNG = "image/png";
     private static final int EXPORT_BITMAP_SIZE = 600;
+    private static final String DIRECTORY_NAME = "Cats";
+    private static final String[] PROJECTION = new String[] {
+            MediaStore.Images.ImageColumns._ID,
+            MediaStore.Images.ImageColumns.DISPLAY_NAME,
+    };
+    private static final String RELATIVE_PATH = "Pictures/" + DIRECTORY_NAME + "/";
+    private static final String SELECTION = MediaStore.Images.ImageColumns.DISPLAY_NAME
+            + " = ? and " + MediaStore.Images.ImageColumns.MIME_TYPE + " = ? and "
+            + MediaStore.Images.ImageColumns.RELATIVE_PATH + " = ?";
 
     private PrefState mPrefs;
     @Sort private int mSort;
@@ -77,7 +93,7 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
         mPrefs.setListener(this);
         mSort = mPrefs.getSort();
         mAdapter = new CatAdapter();
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.holder);
+        final RecyclerView recyclerView = findViewById(R.id.holder);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         updateCats();
@@ -192,11 +208,10 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
     }
 
     private void showNameDialog(final Cat cat) {
-        Context context = new ContextThemeWrapper(this,
-                android.R.style.Theme_Material_Light_Dialog_NoActionBar);
-        // TODO: Move to XML, add correct margins.
+        Context context = new ContextThemeWrapper(
+                this, android.R.style.Theme_Material_Light_Dialog_NoActionBar);
         View view = LayoutInflater.from(context).inflate(R.layout.edit_text, null);
-        final EditText text = (EditText) view.findViewById(android.R.id.edit);
+        final EditText text = view.findViewById(android.R.id.edit);
         text.setText(cat.getName());
         text.setSelection(cat.getName().length());
         final int size = context.getResources()
@@ -274,16 +289,7 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
             });
             holder.share.setOnClickListener((View v) -> {
                 setContextGroupVisible(holder, false);
-                Cat cat = mCats[holder.getAdapterPosition()];
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    mPendingShareCat = cat;
-                    requestPermissions(
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            STORAGE_PERM_REQUEST);
-                    return;
-                }
-                shareCat(cat);
+                shareCat(mCats[holder.getAdapterPosition()]);
             });
         }
 
@@ -294,14 +300,31 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
     }
 
     private void shareCat(final Cat cat) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            shareCatV29(cat);
+        } else {
+            shareCatV24(cat);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void shareCatV24(final Cat cat) {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            mPendingShareCat = cat;
+            requestPermissions(
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    STORAGE_PERM_REQUEST);
+            return;
+        }
         final File dir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                getString(R.string.directory_name));
+                DIRECTORY_NAME);
         if (!dir.exists() && !dir.mkdirs()) {
             Log.e(TAG, "save: error: can't create Pictures directory");
             return;
         }
-        final File png = new File(dir, cat.getName().replaceAll("[/ #:]+", "_") + ".png");
+        final File png = new File(dir, getFilename(cat));
         final Bitmap bitmap = cat.createBitmap(EXPORT_BITMAP_SIZE, EXPORT_BITMAP_SIZE);
         if (bitmap != null) {
             try {
@@ -324,15 +347,91 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
         }
     }
 
+    @TargetApi(29)
+    private void shareCatV29(final Cat cat) {
+        final Uri contentUri =
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        final String filename = getFilename(cat);
+        final ContentResolver resolver = getContentResolver();
+        // See if filename already exists; delete to imitate overwriting.
+        final Cursor cursor = resolver.query(contentUri, PROJECTION, SELECTION,
+                new String[] {filename, IMAGE_PNG, RELATIVE_PATH}, null);
+        if (cursor != null) {
+            final int count = cursor.getCount();
+            for (int i = 0; i < count; i++) {
+                cursor.moveToPosition(i);
+                try {
+                    resolver.delete(
+                            ContentUris.withAppendedId(contentUri, cursor.getLong(0)), null, null);
+                } catch (Exception exception) {
+                    // Oh well...
+                }
+            }
+            cursor.close();
+        }
+        // Yay finally time to write this image!
+        final Bitmap bitmap = cat.createBitmap(EXPORT_BITMAP_SIZE, EXPORT_BITMAP_SIZE);
+        if (bitmap == null) {
+            Log.e(TAG, "shareCat: got null bitmap");
+            return;
+        }
+        final ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);
+        values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_PNG);
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, RELATIVE_PATH);
+        final Uri itemUri = resolver.insert(contentUri, values);
+        if (itemUri == null) {
+            Log.e(TAG, "shareCat: got null itemUri");
+            return;
+        }
+        OutputStream outputStream = null;
+        try {
+            outputStream = resolver.openOutputStream(itemUri);
+            if (outputStream == null) {
+                Log.e(TAG, "shareCat: got null outputStream");
+                resolver.delete(itemUri, null, null);
+                return;
+            }
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        } catch (IOException exception) {
+            Log.e(TAG, "shareCat: IOException writing bitmap", exception);
+            resolver.delete(itemUri, null, null);
+            return;
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException exception) {
+                    Log.e(TAG, "shareCat: IOException closing outputStream", exception);
+                }
+            }
+        }
+        values.clear();
+        values.put(MediaStore.Images.Media.IS_PENDING, 0);
+        resolver.update(itemUri, values, null, null);
+        // Time to send off a share intent.
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, itemUri);
+        intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setType(IMAGE_PNG);
+        startActivity(Intent.createChooser(intent, null));
+    }
+
     @Override
     public void onRequestPermissionsResult(
-            int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == STORAGE_PERM_REQUEST) {
             if (mPendingShareCat != null) {
                 shareCat(mPendingShareCat);
                 mPendingShareCat = null;
             }
         }
+    }
+
+    private static String getFilename(final Cat cat) {
+        return cat.getName().replaceAll("[/ #:]+", "_") + ".png";
     }
 
     private static class CatHolder extends RecyclerView.ViewHolder {
@@ -344,8 +443,8 @@ public final class NekoLand extends BaseActivity implements PrefState.PrefsListe
 
         CatHolder(View itemView) {
             super(itemView);
-            imageView = (ImageView) itemView.findViewById(android.R.id.icon);
-            textView = (TextView) itemView.findViewById(android.R.id.title);
+            imageView = itemView.findViewById(android.R.id.icon);
+            textView = itemView.findViewById(android.R.id.title);
             contextGroup = itemView.findViewById(R.id.contextGroup);
             delete = itemView.findViewById(android.R.id.closeButton);
             share = itemView.findViewById(android.R.id.shareText);

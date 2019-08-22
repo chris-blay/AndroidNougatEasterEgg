@@ -17,8 +17,8 @@ android_binary(
     srcs = glob(["src/**/*.java"]),
     custom_package = "com.covertbagel.neko",
     manifest = "AndroidManifest.xml",
-    proguard_specs = ["release.proguard"],
     proguard_generate_mapping = 1,
+    proguard_specs = ["release.proguard"],
     resource_files = glob(["res/**"]),
     deps = [
         "@androidsdk//com.android.support:recyclerview-v7-25.3.1",
