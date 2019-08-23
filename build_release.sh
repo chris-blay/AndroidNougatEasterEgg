@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
+# Copyright (C) 2017, 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 set -eu
 
 ANDROID_SDK=/opt/android-sdk
-BUILD_TOOLS_VERSION=27.0.3
+BUILD_TOOLS_VERSION=29.0.2
 
 if [ $# -ne 1 ]; then
     echo "Usage: $0 keystore"
@@ -32,16 +32,28 @@ else
 fi
 
 cd workspace
-bazel build -c opt :AndroidNougatEasterEgg
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEgg_unsigned.apk ..
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEgg_proguard.map ..
+bazel build -c opt :AndroidNougatEasterEggV24
+cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV24_unsigned.apk ..
+cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV24_proguard.map ..
+bazel build -c opt :AndroidNougatEasterEggV29
+cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV29_unsigned.apk ..
+cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV29_proguard.map ..
 cd ..
 "$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/zipalign" -v -p 4 \
-    AndroidNougatEasterEgg_unsigned.apk \
-    AndroidNougatEasterEgg_unsigned_aligned.apk
-rm AndroidNougatEasterEgg_unsigned.apk
+    AndroidNougatEasterEggV24_unsigned.apk \
+    AndroidNougatEasterEggV24_aligned.apk
+rm AndroidNougatEasterEggV24_unsigned.apk
+"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/zipalign" -v -p 4 \
+    AndroidNougatEasterEggV29_unsigned.apk \
+    AndroidNougatEasterEggV29_aligned.apk
+rm AndroidNougatEasterEggV29_unsigned.apk
 "$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
-    --ks "$KEYSTORE" --out AndroidNougatEasterEgg_signed.apk \
-    AndroidNougatEasterEgg_unsigned_aligned.apk
-rm AndroidNougatEasterEgg_unsigned_aligned.apk
-mv AndroidNougatEasterEgg_signed.apk AndroidNougatEasterEgg.apk
+    --ks "$KEYSTORE" --out AndroidNougatEasterEggV24_signed.apk \
+    AndroidNougatEasterEggV24_aligned.apk
+rm AndroidNougatEasterEggV24_aligned.apk
+"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
+    --ks "$KEYSTORE" --out AndroidNougatEasterEggV29_signed.apk \
+    AndroidNougatEasterEggV29_aligned.apk
+rm AndroidNougatEasterEggV29_aligned.apk
+mv AndroidNougatEasterEggV24_signed.apk AndroidNougatEasterEggV24.apk
+mv AndroidNougatEasterEggV29_signed.apk AndroidNougatEasterEggV29.apk

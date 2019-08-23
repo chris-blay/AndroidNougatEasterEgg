@@ -1,4 +1,4 @@
-# Copyright (C) 2017, 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
+# Copyright (C) 2019 Christopher Blay <chris.b.blay@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-android_sdk_repository(
-    name = "androidsdk",
-    api_level = 29,
-    build_tools_version = "29.0.2",
-    path = "/opt/android-sdk",
-)
+common --incompatible_depset_is_not_iterable=false
