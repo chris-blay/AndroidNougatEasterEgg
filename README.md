@@ -6,10 +6,13 @@ and published it on Google Play Store.
 
 ## How to install
 
-Get it from the Google Play Store at
-https://play.google.com/store/apps/details?id=com.covertbagel.neko
-or download `AndroidNougatEasterEgg.apk` and sideload it. It's exactly
-the same as the version published on Play Store.
+* Get it from the Google Play Store at
+  https://play.google.com/store/apps/details?id=com.covertbagel.neko
+* For Android Nougat (7), Oreo (8), and Pie (9): Download
+  `AndroidNougatEasterEgg.apk` and sideload it. It's exactly
+  the same as the version published on Play Store.
+* For Android Q (10): Download `AndroidNougatEasterEggSdk29.apk` and
+  sideload it. It's exactly the same as the version published on Play Store.
 
 ## How to keep your cats
 
@@ -27,12 +30,12 @@ https://sourceforge.net/projects/adbextractor/.
 This project uses Bazel to build. You'll need to get Bazel setup first but
 then it's really easy to build.
 
-- Android SDK 24, build tools 27.0.3, and Android Support Library need to be
-  in your local Android SDK installation.
+- Android SDK 29, build tools 29.0.2, and Android Support Library 25.3.1 need
+  to be in your local Android SDK installation.
 - This project is configured to look for your Android SDK installation at
   `/opt/android-sdk` but it's easy enough to change that to wherever you like.
   Just modify the one reference in `workspace/WORKSPACE`.
-- Go to `workspace` and run `bazel build :AndroidNougatEasterEgg`.
+- Go to `workspace` and run `bazel build :AndroidNougatEasterEggDev`.
 
 ## How to hack
 
@@ -44,8 +47,3 @@ Android Studio. Just install the Bazel plugin for Android Studio, use the
 "Import Bazel Project" option, point to `workspace` for the workspace,
 use `workspace/.bazelproject`, and create a project directory here called
 `AndroidNougatEasterEgg` (already in .gitignore) to use.
-
-Some of the support library things don't seem to show up in Android Studio,
-probably because they are in AAR files and that isn't supported yet, but
-all the rest of refactoring, organizing imports, linting, etc. works.
-
