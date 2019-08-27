@@ -21,7 +21,7 @@
         android:versionCode="7"
         android:versionName="7">
 
-    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="29" />
+    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />
 
     <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher">
         <!-- Long press the QS tile to get here -->

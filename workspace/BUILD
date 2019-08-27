@@ -23,16 +23,16 @@ android_binary(
     name = "AndroidNougatEasterEggDev",
     srcs = glob(["src/**/*.java"]),
     custom_package = "com.covertbagel.neko",
-    manifest = "AndroidManifestV29.xml",
+    manifest = "AndroidManifestSdk29.xml",
     resource_files = glob(["res/**"]),
     deps = deps,
 )
 
 android_binary(
-    name = "AndroidNougatEasterEggV24",
+    name = "AndroidNougatEasterEggSdk24",
     srcs = glob(["src/**/*.java"]),
     custom_package = "com.covertbagel.neko",
-    manifest = "AndroidManifestV24.xml",
+    manifest = "AndroidManifestSdk24.xml",
     proguard_generate_mapping = 1,
     proguard_specs = ["release.proguard"],
     resource_files = glob(["res/**"]),
@@ -40,10 +40,10 @@ android_binary(
 )
 
 android_binary(
-    name = "AndroidNougatEasterEggV29",
+    name = "AndroidNougatEasterEggSdk29",
     srcs = glob(["src/**/*.java"]),
     custom_package = "com.covertbagel.neko",
-    manifest = "AndroidManifestV29.xml",
+    manifest = "AndroidManifestSdk29.xml",
     proguard_generate_mapping = 1,
     proguard_specs = ["release.proguard"],
     resource_files = glob(["res/**"]),

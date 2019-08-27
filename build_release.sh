@@ -19,41 +19,39 @@ set -eu
 ANDROID_SDK=/opt/android-sdk
 BUILD_TOOLS_VERSION=29.0.2
 
+if [ ! -f build_release.sh ]; then
+    echo "Execute from containing directory"
+    exit
+fi
+
 if [ $# -ne 1 ]; then
     echo "Usage: $0 keystore"
     exit
-else
-    if [ -f "$1" ]; then
-        KEYSTORE="$1"
-    else
-        echo "Specified keystore does not exist"
-        exit
-    fi
 fi
 
-cd workspace
-bazel build -c opt :AndroidNougatEasterEggV24
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV24_unsigned.apk ..
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV24_proguard.map ..
-bazel build -c opt :AndroidNougatEasterEggV29
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV29_unsigned.apk ..
-cp --no-preserve=mode bazel-bin/AndroidNougatEasterEggV29_proguard.map ..
-cd ..
-"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/zipalign" -v -p 4 \
-    AndroidNougatEasterEggV24_unsigned.apk \
-    AndroidNougatEasterEggV24_aligned.apk
-rm AndroidNougatEasterEggV24_unsigned.apk
-"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/zipalign" -v -p 4 \
-    AndroidNougatEasterEggV29_unsigned.apk \
-    AndroidNougatEasterEggV29_aligned.apk
-rm AndroidNougatEasterEggV29_unsigned.apk
-"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
-    --ks "$KEYSTORE" --out AndroidNougatEasterEggV24_signed.apk \
-    AndroidNougatEasterEggV24_aligned.apk
-rm AndroidNougatEasterEggV24_aligned.apk
-"$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
-    --ks "$KEYSTORE" --out AndroidNougatEasterEggV29_signed.apk \
-    AndroidNougatEasterEggV29_aligned.apk
-rm AndroidNougatEasterEggV29_aligned.apk
-mv AndroidNougatEasterEggV24_signed.apk AndroidNougatEasterEggV24.apk
-mv AndroidNougatEasterEggV29_signed.apk AndroidNougatEasterEggV29.apk
+if [ -f "$1" ]; then
+    KEYSTORE="$1"
+else
+    echo "Specified keystore does not exist"
+    exit
+fi
+
+for SDK in 24 29; do
+    cd workspace
+    bazel build -c opt :AndroidNougatEasterEggSdk${SDK}
+    cp --no-preserve=mode \
+        bazel-bin/AndroidNougatEasterEggSdk${SDK}_unsigned.apk ..
+    cp --no-preserve=mode \
+        bazel-bin/AndroidNougatEasterEggSdk${SDK}_proguard.map ..
+    cd ..
+    "$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/zipalign" -v -p 4 \
+        AndroidNougatEasterEggSdk${SDK}_unsigned.apk \
+        AndroidNougatEasterEggSdk${SDK}_aligned.apk
+    rm AndroidNougatEasterEggSdk${SDK}_unsigned.apk
+    "$ANDROID_SDK/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
+        --ks "$KEYSTORE" --out AndroidNougatEasterEggSdk${SDK}_signed.apk \
+        AndroidNougatEasterEggSdk${SDK}_aligned.apk
+    rm AndroidNougatEasterEggSdk${SDK}_aligned.apk
+    mv AndroidNougatEasterEggSdk${SDK}_signed.apk \
+        AndroidNougatEasterEggSdk${SDK}.apk
+done

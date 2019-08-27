@@ -20,5 +20,5 @@ directories:
 
 targets:
   //:AndroidNougatEasterEggDev
-  //:AndroidNougatEasterEggV24
-  //:AndroidNougatEasterEggV29
+  //:AndroidNougatEasterEggSdk24
+  //:AndroidNougatEasterEggSdk29
