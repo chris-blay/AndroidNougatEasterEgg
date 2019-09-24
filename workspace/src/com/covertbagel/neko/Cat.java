@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -28,14 +28,13 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.support.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;
 
 public final class Cat extends Drawable {
-
-    private static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
 
     private Random mNotSoRandom;
     private Bitmap mBitmap;
@@ -185,11 +184,18 @@ public final class Cat extends Drawable {
                 R.string.default_cat_name, String.valueOf(seed % 1000)));
     }
 
-    Notification.Builder buildNotification(Context context) {
+    @SuppressWarnings({"deprecation", "ObsoleteSdkInt"})
+    Notification buildNotification(Context context, String channelId, long[] vibrationPattern) {
         final Intent intent = new Intent(Intent.ACTION_MAIN)
                 .setClass(context, NekoLand.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return new Notification.Builder(context)
+        final Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= 29) {
+            builder = new Notification.Builder(context, channelId);
+        } else {
+            builder = new Notification.Builder(context);
+        }
+        return builder
                 .setSmallIcon(Icon.createWithResource(context, R.drawable.stat_icon))
                 .setLargeIcon(createNotificationLargeIcon(context))
                 .setColor(getBodyColor())
@@ -200,7 +206,8 @@ public final class Cat extends Drawable {
                 .setContentText(getName())
                 .setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
                 .setAutoCancel(true)
-                .setVibrate(PURR);
+                .setVibrate(vibrationPattern)
+                .build();
     }
 
     long getSeed() {
@@ -210,7 +217,6 @@ public final class Cat extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
         final int widthAndHeight = Math.min(canvas.getWidth(), canvas.getHeight());
-
         if (mBitmap == null
                 || mBitmap.getWidth() != widthAndHeight || mBitmap.getHeight() != widthAndHeight) {
             mBitmap = Bitmap.createBitmap(widthAndHeight, widthAndHeight, Bitmap.Config.ARGB_8888);
@@ -262,7 +268,7 @@ public final class Cat extends Drawable {
         Color.colorToHSV(mBodyColor, hsv);
         hsv[2] = (hsv[2] > 0.5f) ? (hsv[2] - 0.25f) : (hsv[2] + 0.25f);
         pt.setColor(Color.HSVToColor(hsv));
-        final float r = w / 2;
+        final int r = w / 2;
         canvas.drawCircle(r, r, r, pt);
         final int m = w / 10;
         slowDraw(canvas, m, m, w - m - m, h - m - m);
@@ -274,14 +280,10 @@ public final class Cat extends Drawable {
     }
 
     @Override
-    public void setAlpha(int i) {
-
-    }
+    public void setAlpha(int i) {}
 
     @Override
-    public void setColorFilter(ColorFilter colorFilter) {
-
-    }
+    public void setColorFilter(ColorFilter colorFilter) {}
 
     @Override
     public int getOpacity() {
