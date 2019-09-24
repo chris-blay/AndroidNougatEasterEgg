@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,12 +17,13 @@ package com.covertbagel.neko;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 abstract class BaseActivity extends Activity {
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         try {
             super.onRestoreInstanceState(savedInstanceState);
         } catch (Throwable throwable) {

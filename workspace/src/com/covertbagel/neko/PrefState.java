@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Android Open Source Project
- * Copyright (C) 2017, 2018 Christopher Blay <chris.b.blay@gmail.com>
+ * Copyright (C) 2017, 2018, 2019 Christopher Blay <chris.b.blay@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -45,12 +45,12 @@ public final class PrefState implements OnSharedPreferenceChangeListener {
     // Can also be used for renaming.
     void addCat(Cat cat) {
         mPrefs.edit()
-              .putString(CAT_KEY_PREFIX + String.valueOf(cat.getSeed()), cat.getName())
+              .putString(CAT_KEY_PREFIX + cat.getSeed(), cat.getName())
               .apply();
     }
 
     void removeCat(Cat cat) {
-        mPrefs.edit().remove(CAT_KEY_PREFIX + String.valueOf(cat.getSeed())).apply();
+        mPrefs.edit().remove(CAT_KEY_PREFIX + cat.getSeed()).apply();
     }
 
     List<Cat> getCats() {
