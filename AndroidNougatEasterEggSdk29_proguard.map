@@ -2082,18 +2082,17 @@ com.covertbagel.neko.BaseActivity -> com.covertbagel.neko.a:
     void onRestoreInstanceState(android.os.Bundle,android.os.PersistableBundle) -> onRestoreInstanceState
     void log(java.lang.String,java.lang.Throwable) -> a
 com.covertbagel.neko.Cat -> com.covertbagel.neko.b:
-    long[] PURR -> a
-    java.util.Random mNotSoRandom -> e
-    android.graphics.Bitmap mBitmap -> f
-    long mSeed -> b
-    java.lang.String mName -> c
-    int mBodyColor -> d
-    int[] P_BODY_COLORS -> g
-    int[] P_COLLAR_COLORS -> h
-    int[] P_BELLY_COLORS -> i
-    int[] P_DARK_SPOT_COLORS -> j
-    int[] P_LIGHT_SPOT_COLORS -> k
-    com.covertbagel.neko.Cat$CatParts D -> l
+    java.util.Random mNotSoRandom -> d
+    android.graphics.Bitmap mBitmap -> e
+    long mSeed -> a
+    java.lang.String mName -> b
+    int mBodyColor -> c
+    int[] P_BODY_COLORS -> f
+    int[] P_COLLAR_COLORS -> g
+    int[] P_BELLY_COLORS -> h
+    int[] P_DARK_SPOT_COLORS -> i
+    int[] P_LIGHT_SPOT_COLORS -> j
+    com.covertbagel.neko.Cat$CatParts D -> k
     java.util.Random notSoRandom(long) -> a
     float frandrange$4db3a0d1(java.util.Random) -> a
     int chooseP(java.util.Random,int[]) -> a
@@ -2282,6 +2281,7 @@ com.covertbagel.neko.NekoLockedActivity -> com.covertbagel.neko.NekoLockedActivi
     void onRestoreInstanceState(android.os.Bundle,android.os.PersistableBundle) -> onRestoreInstanceState
     void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
 com.covertbagel.neko.NekoService -> com.covertbagel.neko.NekoService:
+    long[] PURR -> b
     java.util.Random RANDOM -> a
     void <init>() -> <init>
     boolean onStartJob(android.app.job.JobParameters) -> onStartJob
