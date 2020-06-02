@@ -11,7 +11,7 @@ and published it on Google Play Store.
 * For Android Nougat (7), Oreo (8), and Pie (9): Download
   `AndroidNougatEasterEgg.apk` and sideload it. It's exactly
   the same as the version published on Play Store.
-* For Android Q (10): Download `AndroidNougatEasterEggSdk29.apk` and
+* For Android 10 and up: Download `AndroidNougatEasterEggSdk29.apk` and
   sideload it. It's exactly the same as the version published on Play Store.
 
 ## How to keep your cats
